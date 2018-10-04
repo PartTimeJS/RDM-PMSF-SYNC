@@ -1,7 +1,7 @@
 # RDM-PMSF-SYNC
 A script to monitor an RDM database and syncronize it with a PMSF database.
 
-# Installation
+## Installation
 
 ### 1: git clone to your directory.
 ### 2: Install Requirements:
@@ -17,8 +17,12 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
      INNER JOIN forts AS f1 ON R1.fort_id = f1.id   
      SET R1.external_id = f1.external_id; 
 ```
-     
-### 4: Navigate to directory and run in tmux or using pm2 (pm2 start sync.js)
+### 4: Fill out the sync_config.json.example file that is located in /files and rename to sync_config.json.
+
+### 5: Navigate to directory and run in tmux or using pm2
+>pm2 start sync.js
+
+You can start RDM before or after running sync.js. You will begin to see console outputs once RDM begins to populate its database. 
 
 
       
