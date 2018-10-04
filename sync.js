@@ -33,7 +33,7 @@ var num;
 
 instance.addTrigger({
   name: 'POKEMON',
-  expression: 'rdmdb.pokemon',
+  expression: config.RDM_DB.dbname+'.pokemon',
   statement: MySQLEvents.STATEMENTS.ALL,
   onEvent: (event) => {
     let sighting=event.affectedRows[0].after; let newID, lat, lon;
@@ -54,7 +54,7 @@ instance.addTrigger({
 
 instance.addTrigger({
   name: 'RAIDS',
-  expression: 'rdmdb.gym',
+  expression: config.RDM_DB.dbname+'.gym',
   statement: MySQLEvents.STATEMENTS.ALL,
   onEvent: (event) => {
     let gym=event.affectedRows[0].after;
