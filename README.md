@@ -12,12 +12,13 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
 
 ### 3: Database Requirements:
 >If not done or just not populated, you will need to insert external_id's into the raids table.
-    
 ```
 UPDATE raids AS R1
      INNER JOIN forts AS f1 ON R1.fort_id = f1.id   
      SET R1.external_id = f1.external_id; 
 ```
+> You will need to change the type of the spawn_id and encounter_id columns in the sightings table to varchar(35). The database did not like the IDs coming from the protos so I had to change this to stop errors. 
+
 ### 4: Fill out the sync_config.json.example file that is located in /files and rename to sync_config.json.
 
 ### 5: Navigate to directory and run in tmux or using pm2
