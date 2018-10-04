@@ -13,7 +13,8 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
 ### 3: Database Requirements:
 >If not done or just not populated, you will need to insert external_id's into the raids table.
     
-```UPDATE raids AS R1
+```
+UPDATE raids AS R1
      INNER JOIN forts AS f1 ON R1.fort_id = f1.id   
      SET R1.external_id = f1.external_id; 
 ```
