@@ -1,0 +1,14 @@
+{
+	"PMSF_DB": {
+		"host": "",
+		"username": "",
+		"password": "",
+		"dbname": ""
+	},
+	"RDM_DB": {
+		"host": "",
+		"username": "",
+		"password": "",
+		"dbname": ""
+	}
+}
