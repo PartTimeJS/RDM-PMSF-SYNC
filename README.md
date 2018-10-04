@@ -8,7 +8,7 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
     - node.js (https://nodejs.org/en/)
 ```npm install mysql
 npm install @rodrigogs/mysql-events
-npm instal pm2` (Optional. Can run in the background using tmux or pm2)```
+npm instal pm2 (Optional. Can run in the background using tmux or pm2)```
 3: Database Requirements:
     - If not done, you will need to insert external_id's into the raids table.
 ```UPDATE raids AS R1
