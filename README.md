@@ -5,7 +5,7 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
 
 1: git clone to your directory.
 2: Install Requirements:
-*Install node.js (https://nodejs.org/en/) then run: 
+>Install node.js (https://nodejs.org/en/) then run: 
 ```npm install mysql
 npm install @rodrigogs/mysql-events
 npm instal pm2 (Optional. Can run in the background using tmux or pm2
