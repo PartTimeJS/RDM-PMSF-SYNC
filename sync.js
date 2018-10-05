@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const config=require('./files/sync_config.json');
+const moment=require('moment');
 
 const PMSF_DB = mysql.createConnection({
   host: config.PMSF_DB.host,
@@ -42,11 +43,15 @@ instance.addTrigger({
         let polarity=Math.floor(Math.random() * 2);
         let latAdj=(Math.floor(Math.random() * 5)+4)/100000;
         let lonAdj=(Math.floor(Math.random() * 5)+4)/100000;
+        let timeNow=new Date().getTime();
+        let expireTime=moment.unix(timeNow)+900;
         if(polarity==0){ lat=sighting.lat+lonAdj; lon=sighting.lon-latAdj; }
         else{ lat=sighting.lat-latAdj; lon=sighting.lon+lonAdj; }
         console.info('[SIGHTINGS] Inserted a Pokemon.');
         PMSF_DB.query(`INSERT INTO sightings (id, pokemon_id, spawn_id, expire_timestamp, encounter_id, lat, lon, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, updated, weather_boosted_condition, weather_cell_id, weight) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-          [newID, sighting.pokemon_id, sighting.id, sighting.expire_timestamp, sighting.id, lat, lon, sighting.atk_iv, sighting.def_iv, sighting.sta_iv, sighting.move_1, sighting.move_2, sighting.gender, sighting.form, sighting.cp, sighting.level, sighting.updated, 0, , sighting.weight]);
+          [newID, sighting.pokemon_id, sighting.id, expireTime, sighting.id, lat, lon, sighting.atk_iv, sighting.def_iv, sighting.sta_iv, sighting.move_1, sighting.move_2, sighting.gender, sighting.form, sighting.cp, sighting.level, sighting.updated, 0, , sighting.weight], function (error, results, fields) {
+          if(error){ console.error('[SIGHTINGS] Insert Pokemon ERROR'); }
+        });
       }
     });
   }
