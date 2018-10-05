@@ -9,7 +9,7 @@ A script to monitor an RDM database and syncronize it with a PMSF database.
 >**npm install mysql**<br/>
 >**npm install moment**<br/>
 >**npm install @rodrigogs/mysql-events**<br/>
->**npm instal pm2** (Optional. Can run in the background using tmux or pm2
+>**npm install pm2** (Optional. Can run in the background using tmux or pm2
 
 ### 3: Database Requirements:
 >You need to be on a branch of PMSF that supports manual submitting with a submitted_by column in raids and sightings.
@@ -19,6 +19,14 @@ UPDATE raids AS R1
      INNER JOIN forts AS f1 ON R1.fort_id = f1.id   
      SET R1.external_id = f1.external_id; 
 ```
+>To reduce queries for high volume databases, external_id needs to be added to fort_sightings. 
+```
+ALTER TABLE fort_sightings ADD COLUMN external_id varchar(35)
+UPDATE fort_sightings AS R1
+     INNER JOIN forts AS f1 ON R1.fort_id = f1.id   
+     SET R1.external_id = f1.external_id; 
+```
+
 > You will need to change the type of the spawn_id and encounter_id columns in the sightings table to varchar(35). The database did not like the IDs coming from the protos so I had to change this to stop errors. 
 
 ### 4: Fill out the sync_config.json.example file that is located in /files and rename to sync_config.json.
