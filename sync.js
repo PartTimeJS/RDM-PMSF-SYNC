@@ -37,8 +37,15 @@ instance.addTrigger({
   expression: config.RDM_DB.dbname+'.pokemon',
   statement: MySQLEvents.STATEMENTS.INSERT,
   onEvent: (event) => {
+    let timeNow=new Date().getTime(); timeNow=moment(timeNow).unix();
     if(event.affectedRows[0].after.spawn_id==null){
       RDM_DB.query(`UPDATE pokemon SET spawn_id = ? WHERE id = ?`, [event.affectedRows[0].after.id, event.affectedRows[0].after.id], function (error, results, fields) {
+        if(error){ return console.error('[RDM] Unable to update sighting',error); }
+        else{ return; }
+      });
+    }
+    else{
+      RDM_DB.query(`UPDATE pokemon SET updated = ? WHERE id = ?`, [timeNow, event.affectedRows[0].after.id], function (error, results, fields) {
         if(error){ return console.error('[RDM] Unable to update sighting',error); }
         else{ return; }
       });
