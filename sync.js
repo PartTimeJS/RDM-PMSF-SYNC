@@ -39,7 +39,7 @@ instance.addTrigger({
   onEvent: (event) => {
     let sighting=event.affectedRows[0].after; let newID, lat, lon;
     PMSF_DB.query(`SELECT * FROM sightings WHERE spawn_id='${sighting.id}'`, (err, row) => {
-      if(!row[0]){
+      if(!row || !row[0]){
         let polarity=Math.floor(Math.random() * 2);
         let latAdj=(Math.floor(Math.random() * 5)+4)/100000;
         let lonAdj=(Math.floor(Math.random() * 5)+4)/100000;
@@ -65,7 +65,7 @@ instance.addTrigger({
   onEvent: (event) => {
     let gym=event.affectedRows[0].after;
     PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, (err, row) => {
-      if(!row[0]){
+      if(!row || !row[0]){
         PMSF_DB.query(`INSERT INTO forts (id, external_id, lat, lon, name, url, sponsor, weather_cell_id, park, parkid, edited_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
           [ , gym.id, gym.lat, gym.lon, gym.name, gym.url, gym.ex_raid_eligible, ,  , , 'sync.js'], function (error, results, fields) {
           if(error){ console.error('[SIGHTINGS] Insert fort ERROR',error); }
@@ -75,7 +75,7 @@ instance.addTrigger({
       if(err){ console.error('[FORTS] Unable to select a fort in the forts table.',error); }
     });
     PMSF_DB.query(`SELECT * FROM raids WHERE external_id='${gym.id}'`, (err, row) => {
-      if(row[0]){
+      if(row && row[0]){
         if(row.pokemon_id!=gym.raid_pokemon_id || row.time_battle!=gym.raid_battle_timestamp){
           PMSF_DB.query(`UPDATE raids SET level = ?, pokemon_id = ?, move_1 = ?, move_2 = ?, time_spawn = ?, time_battle = ?, time_end = ?, cp = ?, form = ? WHERE external_id = ?`,
             [gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_battle_timestamp, gym.raid_end_timestamp, gym.raid_pokemon_cp, gym.raid_pokemon_form, gym.id], function (error, results, fields) {
@@ -106,7 +106,7 @@ instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 
 function updateFortSightings(gym){
   PMSF_DB.query(`SELECT * FROM fort_sightings WHERE external_id = '${gym.id}'`, (err, row) => {
-    if(!row[0]){
+    if(!row || !row[0]){
       PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, fort, fields) {
         PMSF_DB.query(`INSERT INTO fort_sightings (id, fort_id, last_modified, team, guard_pokemon_id, slots_available, is_in_battle, updated, external_id) VALUES (?,?,?,?,?,?,?,?,?)`,
           [ , fort.id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id], function (error, results, fields) {
