@@ -37,4 +37,22 @@ UPDATE fort_sightings AS R1
 You can start RDM before or after running sync.js. You will begin to see console outputs once RDM begins to populate its database. 
 
 
+### This is based on the following table setup:
+RAIDS table:
+```
+id, external_id, fort_id, level, pokemon_id, move_1, move_2, time_spawn, time_battle, time_end, cp, submitted_by, form
+```
+SIGHTINGS table:
+```
+id, pokemon_id, spawn_id, expire_timestamp, encounter_id, lat, lon, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, updated, weather_boosted_condition, weather_cell_id, weight
+```
+FORTS table:
+```
+id, external_id, lat, lon, name, url, sponsor, weather_cell_id, park, parkid, edited_by
+```
+FORT_SIGHTINGS table:
+```
+id, fort_id, last_modified, team, guard_pokemon_id, slots_available, is_in_battle, updated, external_id
+```
+
       
