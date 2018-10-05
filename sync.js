@@ -53,6 +53,7 @@ instance.addTrigger({
           else{ console.info('[SIGHTINGS] Inserted a Pokemon.'); }
         });
       }
+      if(err){ console.error('[FORTS] Unable to select a sighting in the sightings table.',error); }
     });
   }
 });
@@ -63,14 +64,15 @@ instance.addTrigger({
   statement: MySQLEvents.STATEMENTS.ALL,
   onEvent: (event) => {
     let gym=event.affectedRows[0].after;
-    PMSF_DB.query(`SELECT * FROM forts WHERE external_id='${gym.id}'`, (err, row) => {
+    PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, (err, row) => {
       if(!row[0]){
         PMSF_DB.query(`INSERT INTO forts (id, external_id, lat, lon, name, url, sponsor, weather_cell_id, park, parkid, edited_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-          [ , gym.id, gym.lat, gym.lon, gym.name, gym.url, gym.ex_raid_eligible, ,  , , 'Russell\'s Awesome Bot'], function (error, results, fields) {
+          [ , gym.id, gym.lat, gym.lon, gym.name, gym.url, gym.ex_raid_eligible, ,  , , 'sync.js'], function (error, results, fields) {
           if(error){ console.error('[SIGHTINGS] Insert fort ERROR',error); }
           else{ console.info('[FORTS] Added a new fort to the database.'); }
         });
       }
+      if(err){ console.error('[FORTS] Unable to select a fort in the forts table.',error); }
     });
     PMSF_DB.query(`SELECT * FROM raids WHERE external_id='${gym.id}'`, (err, row) => {
       if(row[0]){
@@ -83,14 +85,16 @@ instance.addTrigger({
         }
       }
       else{
-        PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, result, fields) {
+        PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, (err, row) => {
           PMSF_DB.query(`INSERT INTO raids (id, external_id, fort_id, level, pokemon_id, move_1, move_2, time_spawn, time_battle, time_end, cp, submitted_by, form) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [ , gym.id, result[0].id, gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_spawn_battle, gym.raid_end_timestamp, gym.raid_pokemon_cp, , gym.raid_pokemon_form], function (error, results, fields) {
               if(error){ console.error('[RAIDS] Update raids ERROR',error); }
               else{ console.info('[RAIDS] Inserted a new raid record.'); }
           });
+          if(err){ console.error('[FORTS] Unable to select a fort in the forts table.',error); }
         });
       }
+      if(err){ console.error('[RAIDS] Unable to select a raid in the raids table.',error); }
       updateFortSightings(gym);
     });
   }
@@ -101,21 +105,21 @@ instance.on(MySQLEvents.EVENTS.CONNECTION_ERROR, console.error);
 instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 
 function updateFortSightings(gym){
-  PMSF_DB.query(`SELECT * FROM fort_sightings WHERE external_id = '${gym.id}'`, function (error, result, fields) {
-    if(!result || !result[0]){
+  PMSF_DB.query(`SELECT * FROM fort_sightings WHERE external_id = '${gym.id}'`, (err, row) => {
+    if(!row[0]){
       PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, fort, fields) {
         PMSF_DB.query(`INSERT INTO fort_sightings (id, fort_id, last_modified, team, guard_pokemon_id, slots_available, is_in_battle, updated, external_id) VALUES (?,?,?,?,?,?,?,?,?)`,
           [ , fort.id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id], function (error, results, fields) {
-            if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR',error); }
+            if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR. You may be missing the external_id column in fort_sightings.',error); }
             else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
         });
-        if(error){console.error}
+        if(error){ console.error }
       });
     }
     else{
       PMSF_DB.query(`UPDATE fort_sightings SET updated = ?, team = ?, guard_pokemon_id = ?, slots_available = ?, is_in_battle =? WHERE external_id = ?`,
         [gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.id], function (error, results, fields) {
-        if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR',error); }
+        if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR. You may be missing the external_id column in fort_sightings.',error); }
         else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
       });
     }
