@@ -47,10 +47,10 @@ instance.addTrigger({
         let expireTime=moment.unix(timeNow)+900;
         if(polarity==0){ lat=sighting.lat+lonAdj; lon=sighting.lon-latAdj; }
         else{ lat=sighting.lat-latAdj; lon=sighting.lon+lonAdj; }
-        console.info('[SIGHTINGS] Inserted a Pokemon.');
         PMSF_DB.query(`INSERT INTO sightings (id, pokemon_id, spawn_id, expire_timestamp, encounter_id, lat, lon, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, updated, weather_boosted_condition, weather_cell_id, weight) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
           [newID, sighting.pokemon_id, sighting.id, expireTime, sighting.id, lat, lon, sighting.atk_iv, sighting.def_iv, sighting.sta_iv, sighting.move_1, sighting.move_2, sighting.gender, sighting.form, sighting.cp, sighting.level, sighting.updated, 0, , sighting.weight], function (error, results, fields) {
-          if(error){ console.error('[SIGHTINGS] Insert Pokemon ERROR'); }
+          if(error){ console.error('[SIGHTINGS] Insert Pokemon ERROR',error); }
+          else{ console.info('[SIGHTINGS] Inserted a Pokemon.'); }
         });
       }
     });
@@ -65,24 +65,30 @@ instance.addTrigger({
     let gym=event.affectedRows[0].after;
     PMSF_DB.query(`SELECT * FROM forts WHERE external_id='${gym.id}'`, (err, row) => {
       if(!row[0]){
-        console.error('[FORTS] Added a new fort to the database.');
         PMSF_DB.query(`INSERT INTO forts (id, external_id, lat, lon, name, url, sponsor, weather_cell_id, park, parkid, edited_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-          [ , gym.id, gym.lat, gym.lon, gym.name, gym.url, gym.ex_raid_eligible, ,  , , 'Russell\'s Awesome Bot']);
+          [ , gym.id, gym.lat, gym.lon, gym.name, gym.url, gym.ex_raid_eligible, ,  , , 'Russell\'s Awesome Bot'], function (error, results, fields) {
+          if(error){ console.error('[SIGHTINGS] Insert fort ERROR',error); }
+          else{ console.info('[FORTS] Added a new fort to the database.'); }
+        });
       }
     });
     PMSF_DB.query(`SELECT * FROM raids WHERE external_id='${gym.id}'`, (err, row) => {
       if(row[0]){
         if(row.pokemon_id!=gym.raid_pokemon_id || row.time_battle!=gym.raid_battle_timestamp){
-          console.info('[RAIDS] Updated a Raid.')
           PMSF_DB.query(`UPDATE raids SET level = ?, pokemon_id = ?, move_1 = ?, move_2 = ?, time_spawn = ?, time_battle = ?, time_end = ?, cp = ?, form = ? WHERE external_id = ?`,
-            [gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_battle_timestamp, gym.raid_end_timestamp, gym.raid_pokemon_cp, gym.raid_pokemon_form, gym.id]);
+            [gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_battle_timestamp, gym.raid_end_timestamp, gym.raid_pokemon_cp, gym.raid_pokemon_form, gym.id], function (error, results, fields) {
+              if(error){ console.error('[RAIDS] Update raids ERROR',error); }
+              else{ console.info('[RAIDS] Updated a Raid.'); }
+          });
         }
       }
       else{
-        console.info('[RAIDS] Inserted a new raid record.')
         PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, result, fields) {
           PMSF_DB.query(`INSERT INTO raids (id, external_id, fort_id, level, pokemon_id, move_1, move_2, time_spawn, time_battle, time_end, cp, submitted_by, form) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-            [ , gym.id, result[0].id, gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_spawn_battle, gym.raid_end_timestamp, gym.raid_pokemon_cp, , gym.raid_pokemon_form]);
+            [ , gym.id, result[0].id, gym.raid_level, gym.raid_pokemon_id, gym.raid_pokemon_move_1, gym.raid_pokemon_move_2, gym.raid_spawn_timestamp, gym.raid_spawn_battle, gym.raid_end_timestamp, gym.raid_pokemon_cp, , gym.raid_pokemon_form], function (error, results, fields) {
+              if(error){ console.error('[RAIDS] Update raids ERROR',error); }
+              else{ console.info('[RAIDS] Inserted a new raid record.'); }
+          });
         });
       }
       updateFortSightings(gym);
@@ -97,11 +103,10 @@ instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 function updateFortSightings(gym){
   PMSF_DB.query(`SELECT * FROM fort_sightings WHERE external_id = '${gym.id}'`, function (error, result, fields) {
     if(!result || !result[0]){
-      console.info('[FORT_SIGHTINGS] Inserted a new fort_sighting record.');
-      PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, result, fields) {
+      PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, fort, fields) {
         PMSF_DB.query(`INSERT INTO fort_sightings (id, fort_id, last_modified, team, guard_pokemon_id, slots_available, is_in_battle, updated, external_id) VALUES (?,?,?,?,?,?,?,?,?)`,
-          [ , result[0].id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id], function (error, results, fields) {
-            if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR'); }
+          [ , fort.id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id], function (error, results, fields) {
+            if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR',error); }
             else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
         });
         if(error){console.error}
@@ -110,7 +115,7 @@ function updateFortSightings(gym){
     else{
       PMSF_DB.query(`UPDATE fort_sightings SET updated = ?, team = ?, guard_pokemon_id = ?, slots_available = ?, is_in_battle =? WHERE external_id = ?`,
         [gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.id], function (error, results, fields) {
-        if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR'); }
+        if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR',error); }
         else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
       });
     }
