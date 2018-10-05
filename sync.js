@@ -96,18 +96,23 @@ instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 
 function updateFortSightings(gym){
   PMSF_DB.query(`SELECT * FROM fort_sightings WHERE external_id = '${gym.id}'`, function (error, result, fields) {
-    if(!result[0]){
+    if(!result || !result[0]){
       console.info('[FORT_SIGHTINGS] Inserted a new fort_sighting record.');
       PMSF_DB.query(`SELECT * FROM forts WHERE external_id = '${gym.id}'`, function (error, result, fields) {
         PMSF_DB.query(`INSERT INTO fort_sightings (id, fort_id, last_modified, team, guard_pokemon_id, slots_available, is_in_battle, updated, external_id) VALUES (?,?,?,?,?,?,?,?,?)`,
-          [ , result[0].id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id]);
+          [ , result[0].id, gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.updated, gym.id], function (error, results, fields) {
+            if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR'); }
+            else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
+        });
         if(error){console.error}
       });
     }
     else{
-      console.info('[FORT_SIGHTINGS] Updated a fort sighting.')
       PMSF_DB.query(`UPDATE fort_sightings SET updated = ?, team = ?, guard_pokemon_id = ?, slots_available = ?, is_in_battle =? WHERE external_id = ?`,
-        [gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.id]);
+        [gym.updated, gym.team_id, gym.guard_pokemon_id, gym.availble_slots, gym.in_battle, gym.id], function (error, results, fields) {
+        if(error){ console.error('[FORT_SIGHTINGS] Update fort_sightings ERROR'); }
+        else{ console.info('[FORT_SIGHTINGS] Updated a fort sighting.'); }
+      });
     }
   });
 }
