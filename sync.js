@@ -44,7 +44,7 @@ instance.addTrigger({
         let latAdj=(Math.floor(Math.random() * 5)+4)/100000;
         let lonAdj=(Math.floor(Math.random() * 5)+4)/100000;
         let timeNow=new Date().getTime();
-        let expireTime=moment.unix(timeNow)+900;
+        let expireTime=moment(timeNow).unix()+900;
         if(polarity==0){ lat=sighting.lat+lonAdj; lon=sighting.lon-latAdj; }
         else{ lat=sighting.lat-latAdj; lon=sighting.lon+lonAdj; }
         PMSF_DB.query(`INSERT INTO sightings (id, pokemon_id, spawn_id, expire_timestamp, encounter_id, lat, lon, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, updated, weather_boosted_condition, weather_cell_id, weight) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
