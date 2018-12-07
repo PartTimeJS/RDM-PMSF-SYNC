@@ -1,3 +1,5 @@
+# THIS REPO IS NO LONGER MAINTAINED AS OF 6-DEC-2018
+
 # RDM-PMSF-SYNC
 A script to monitor an RDM database and syncronize it with a PMSF database.
 
